@@ -62,14 +62,27 @@ def forge():
     click.echo('数据添加成功')
 
 
+# 模版上下文处理函数
+# 该函数返回的变量(以字典的形式)将会统一注入到每一个模版的上下文
+@app.context_processor
+def inject_user():
+    user = User.query.first()
+    return dict(user=user)  # 返回字典，等同于{'user':user}
+
+
+# 注册一个错误处理函数，当404错误发生时，触发此函数
+@app.errorhandler(404)  # 传入要处理的错误函数
+def page_not_found(e):  # 接受异常对象作为参数
+    return render_template('404.html'), 404  # 返回模版和状态码
+
+
 # 使用装饰器对视图函数进行注册
 # 将视图函数绑定到对应的url，当用户在浏览器访问这个url时，就会触发这个函数，获取返回值，并将这个返回值显示到浏览器窗口
 @app.route('/')
 # 视图函数：处理某个请求的函数
 def index():
-    user = User.query.first()  # 读取用户记录
     movies = Movie.query.all()  # 读取所有电影记录
-    return render_template('index.html', user=user, movies=movies)
+    return render_template('index.html', movies=movies)
 
 
 @app.route('/user/<name>/')
